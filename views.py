@@ -1,22 +1,30 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .forms import UserForm
+from .models import Person
 
 def index(request):
     my_text = 'Изучаем формы Django!'
-    context = {'my_text': my_text}
+    people_kol = Person.object_person.count()
+    context = {'my_text': my_text, "prople_kol": people_kol, }
     return render(request, "firstapp/index.html", context)
+
 def about(request):
     return render(request, "firstapp/about.html")
+
 def contact(request):
     return render(request, "firstapp/contact.html") 
 
 def my_form(request):
-    userform = UserForm()
-    if request.method == "POST":
-        userform = UserForm(request.POST)
-        if userform.is_valid():
-            name = userform.cleaned_data["name"]
-            return HttpResponse(
-            "<h2>Имя введено корректно - {0} </h2>".format(name))
-    return render(request,"firstapp/my_form.html", {"form": userform})
+    # Взаимодействие с формой ввода данных о клиентах
+    if request.method == "POST": #  пользователь отправил данные
+        form = UserForm(request.POST) # Создание экземпляра фирмы
+        if form.is_valid(): # Проверка валидности формы
+            form.save() #  Запись в базу данных
+    # Загрузка формы для ввода клиентов 
+    my_text = 'Сведенья о клиентах'
+    people = Person.object_person.all()
+    form = UserForm
+    context = {'my_text': my_text, 'people': people, 'form': form, }
+    return render(request, "firstapp/my_form.html", context)
+    
